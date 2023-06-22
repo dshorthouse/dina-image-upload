@@ -40,9 +40,9 @@ end
 
 def calculated_hash(path:, hash_function:)
   if hash_function == "Double SHA-1"
-    `openssl dgst -binary -sha1 "#{path}" | openssl sha1`.split(" ")[1]
+    `openssl dgst -binary -sha1 "#{path}" | openssl sha1`.split(" ").last
   elsif hash_function == "SHA-1"
-    `openssl dgst -sha1 "#{path}"`.split(" ")[1]
+    `openssl dgst -sha1 "#{path}"`.split(" ").last
   end
 end
 
