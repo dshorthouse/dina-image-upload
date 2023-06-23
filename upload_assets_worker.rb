@@ -6,6 +6,8 @@ require "csv"
 require "dina"
 require "time"
 
+$stdout.sync = true
+
 ARGV << '-h' if ARGV.empty?
 
 OPTIONS = {}

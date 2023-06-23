@@ -12,4 +12,4 @@ cd ~/cluster_scripts/dina-image-upload
 line=$SGE_TASK_ID
 output=`./upload_assets_worker.rb --paths_list_file $paths_list_file --line $line`
 
-echo "$output" >>  ~/cluster_scripts/dina-image-upload/upload_assets_output.csv
+echo "$output" | tee -a upload_assets_output.csv  >/dev/null
