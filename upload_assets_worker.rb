@@ -62,8 +62,6 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
 
   dina_config
 
-  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
-
   CSV.foreach(path) do |row|
     if row[0].to_i == line_to_process.to_i
       if !File.directory?(row[1])
