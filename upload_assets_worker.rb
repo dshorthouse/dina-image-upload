@@ -49,6 +49,13 @@ def calculated_hash(path:, hash_function:)
   end
 end
 
+def db_insert(table:, hash:)
+  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
+  cols = *hash.keys.join(",").first
+  places = *("?"*hash.keys.size).split("").join(",").first
+  db.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
+end
+
 if OPTIONS[:paths_list] && OPTIONS[:line]
   path = OPTIONS[:paths_list]
   line_to_process = OPTIONS[:line]
@@ -64,7 +71,7 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
           type: 'directory missing',
           original_directory: row[1]
         }
-        db.execute "insert into errors values (?, ?)", error
+        db_insert(table: "errors", hash: error)
         puts "directory missing: #{row[1]}"
         exit
       end
@@ -105,7 +112,7 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
             type: 'original file',
             original_directory: row[1]
           }
-          db.execute "insert into errors values (?, ?) values", error
+          db_insert(table: "errors", hash: error)
           raise "original file did not upload: #{row[1]}"
         end
 
@@ -142,7 +149,7 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
               type: 'hash mismatch',
               original_directory: row[1]
             }
-            db.execute "insert into errors values (?, ?)", error
+            db_insert(table: "errors", hash: error)
             raise "hashes do not match: #{row[1]}"
           end
         else
@@ -150,7 +157,7 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
             type: 'metadata',
             original_directory: row[1]
           }
-          db.execute "insert into errors values (?, ?)", error
+          db_insert(table: "errors", hash: error)
           raise "metadata did not save: #{row[1]}"
         end
 
@@ -166,7 +173,7 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
             type: 'derivative file',
             original_directory: row[1]
           }
-          db.execute "insert into errors values (?, ?)", error
+          db_insert(table: "errors", hash: error)
           raise "derivative file did not upload: #{row[1]}"
         end
 
@@ -188,18 +195,18 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
             type: 'derivative metadata',
             original_directory: row[1]
           }
-          db.execute "insert into errors values (?, ?)", error
+          db_insert(table: "errors", hash: error)
           raise "derivative metadata did not save: #{row[1]}"
         end
 
-        db.execute "insert into logs values (?, ?, ?, ?, ?)", response
+        db_insert(table: "logs", hash: response)
         puts response.to_s
       rescue Exception => e
         error = {
           type: "exception",
           original_directory: row[1]
         }
-        db.execute "insert into errors values (?, ?)", error
+        db_insert(table: "errors", hash: error)
         puts e.message + ": #{row[1]}"
         raise
       end
