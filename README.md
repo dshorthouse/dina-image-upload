@@ -39,10 +39,10 @@ rows = db.execute <<-SQL
   );
 SQL
 rows = db.execute <<-SQL
-create table errors (
-  type varchar(256),
-  original_directory varchar(256)
-);
+  create table errors (
+    type varchar(256),
+    original_directory varchar(256)
+  );
 SQL
 ```
 

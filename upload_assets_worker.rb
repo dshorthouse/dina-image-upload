@@ -146,7 +146,11 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
             raise "hashes do not match: #{row[1]}"
           end
         else
-          db.execute "insert into errors (?, ?) values ('metadata', row[1])"
+          error = {
+            type: 'metadata',
+            original_directory: row[1]
+          }
+          db.execute "insert into errors values (?, ?)", error
           raise "metadata did not save: #{row[1]}"
         end
 
