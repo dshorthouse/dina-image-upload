@@ -3,4 +3,5 @@ ruby '3.1.2'
 
 gem 'colorize'
 gem 'dina'
+gem 'sqlite3'
 gem 'byebug'

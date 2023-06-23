@@ -5,6 +5,7 @@ require "optparse"
 require "csv"
 require "dina"
 require "time"
+require "sqlite3"
 
 $stdout.sync = true
 
@@ -54,9 +55,16 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
 
   dina_config
 
+  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
+
   CSV.foreach(path) do |row|
     if row[0].to_i == line_to_process.to_i
       if !File.directory?(row[1])
+        error = {
+          type: 'directory missing',
+          original_directory: row[1]
+        }
+        db.execute "insert into errors values (?, ?)", error
         puts "directory missing: #{row[1]}"
         exit
       end
@@ -93,6 +101,11 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
         if original.save
           response[:image_original] = original.id
         else
+          error = {
+            type: 'original file',
+            original_directory: row[1]
+          }
+          db.execute "insert into errors values (?, ?) values", error
           raise "original file did not upload: #{row[1]}"
         end
 
@@ -125,9 +138,15 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
           hash = calculated_hash(path: original.file_path, hash_function: metadata.acHashFunction)
           if metadata.acHashValue != hash
             metadata.destroy
+            error = {
+              type: 'hash mismatch',
+              original_directory: row[1]
+            }
+            db.execute "insert into errors values (?, ?)", error
             raise "hashes do not match: #{row[1]}"
           end
         else
+          db.execute "insert into errors (?, ?) values ('metadata', row[1])"
           raise "metadata did not save: #{row[1]}"
         end
 
@@ -139,6 +158,11 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
         if derivative.save
           response[:image_derivative] = derivative.id
         else
+          error = {
+            type: 'derivative file',
+            original_directory: row[1]
+          }
+          db.execute "insert into errors values (?, ?)", error
           raise "derivative file did not upload: #{row[1]}"
         end
 
@@ -156,11 +180,22 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
         if metadata_derivative.save
           response[:derivative] = metadata_derivative.id
         else
+          error = {
+            type: 'derivative metadata',
+            original_directory: row[1]
+          }
+          db.execute "insert into errors values (?, ?)", error
           raise "derivative metadata did not save: #{row[1]}"
         end
 
+        db.execute "insert into logs values (?, ?, ?, ?, ?)", response
         puts response.to_s
       rescue Exception => e
+        error = {
+          type: "exception",
+          original_directory: row[1]
+        }
+        db.execute "insert into errors values (?, ?)", error
         puts e.message + ": #{row[1]}"
         raise
       end

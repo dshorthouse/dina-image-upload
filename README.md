@@ -16,9 +16,35 @@ This script is under development and contains a number of hard-coded features. I
 ### Install
 
 ```bash
-$ gem install dina
+$ gem install colorize dina sqlite3
 ```
 ### Configuration
+
+Create SQLite database:
+
+```ruby
+require "sqlite3"
+
+# Open a database
+db = SQLite3::Database.new "image-upload.db"
+
+# Create tables
+rows = db.execute <<-SQL
+  create table logs (
+    original_directory varchar(256),
+    object char(36),
+    derivative char(36),
+    image_original char(36),
+    image_derivative char(36)
+  );
+SQL
+rows = db.execute <<-SQL
+create table errors (
+  type varchar(256),
+  original_directory varchar(256)
+);
+SQL
+```
 
 See configuration for the dina gem in upload_assets_worker.rb
 
