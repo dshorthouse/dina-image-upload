@@ -197,6 +197,14 @@ if OPTIONS[:paths_list] && OPTIONS[:line]
           raise "derivative metadata did not save: #{row[1]}"
         end
 
+        # Write the UUIDs into the sidecar file
+        if yml.key?("productionUUIDs")
+          yml["productionUUIDs"]["metadata"] = response[:object]
+          yml["productionUUIDs"]["original"] = response[:image_original]
+          yml["productionUUIDs"]["derivative"] = response[:image_derivative]
+          File.open(sidecar, 'w') { |f| f.write(yml.to_yaml) }
+        end
+
         db_insert(table: "logs", hash: response)
         puts response.to_s
       rescue Exception => e
