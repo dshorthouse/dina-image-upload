@@ -92,6 +92,7 @@ Authors: [David P. Shorthouse][4]
 [1]: https://dina-project.net/
 [2]: http://www.opensource.org/licenses/MIT
 [3]: https://github.com/dshorthouse/dina-image-upload/issues
+[4]: https://github.com/dshorthouse
 [5]: https://github.com/JsonApiClient/json_api_client
 [9]: https://rubygems.org/gems/dina
 [10]: https://github.com/imagov/keycloak
