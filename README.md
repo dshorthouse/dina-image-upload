@@ -52,6 +52,30 @@ See configuration for the dina gem in upload_assets_worker.rb
 
 `./load-jobs.rb -d /my-root-directories`
 
+### SQLite Specifics
+
+```
+$ sqlite3 image-upload.db
+
+# Show tables
+sqlite> .tables
+errors logs
+
+# Show schema
+sqlite> .schema
+
+# Select all records from tables
+sqlite> SELECT * FROM errors;
+sqlite> SELECT * FROM logs;
+
+# Truncate tables
+sqlite> DELETE FROM errors;
+sqlite> DELETE FROM logs;
+
+# Exit out from sqlite
+ctrl-d
+```
+
 ### Support
 
 Bug reports can be filed at [https://github.com/dshorthouse/dina-image-upload/issues][3].

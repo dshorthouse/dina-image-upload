@@ -51,8 +51,8 @@ end
 
 def db_insert(table:, hash:)
   db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
-  cols = *hash.keys.join(",").first
-  places = *("?"*hash.keys.size).split("").join(",").first
+  cols = hash.keys.join(",")
+  places = ("?"*(hash.keys.size)).split("").join(",")
   db.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
 end
 
