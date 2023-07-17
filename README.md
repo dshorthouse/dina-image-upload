@@ -19,7 +19,7 @@ This script is under development and contains a number of hard-coded features. I
 $ git clone https://github.com/dshorthouse/dina-image-upload.git
 $ conda env create -f conda/environment.yml
 $ conda activate dina
-$ gem install colorize dina sqlite3
+$ gem install byebug colorize dina sqlite3
 ```
 ## Configuration
 
