@@ -16,6 +16,10 @@ OptionParser.new do |opts|
     OPTIONS[:directory] = directory
   end
 
+  opts.on("-n", "--nested", "Do nested traversal of supplied directory") do
+    OPTIONS[:nested] = true
+  end
+
   opts.on("-h", "--help", "Prints this help") do
     puts opts
     exit
@@ -30,7 +34,7 @@ def call_qsub(directories)
     end
   end
   min_max = directories.map{|a| a[0]}.minmax
-  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min_max[0]}-#{min_max[1]}" -tc 5 "#{Dir.pwd}"/qsub_batch.sh --paths_list_file "#{file}"`
+  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min_max[0]}-#{min_max[1]}" -tc 3 "#{Dir.pwd}"/qsub_batch.sh --paths_list_file "#{file}"`
   puts "Batch sent for #{min_max}"
 end
 
@@ -46,22 +50,31 @@ if OPTIONS[:directory]
 
   index = 0
   directories = []
-  Find.find(OPTIONS[:directory]) do |path|
-    next if File.basename(path) != "metadata.yml"
-    dir = File.dirname(path)
-    index += 1
-    if index % 500 == 0
-      directories << [index, dir]
-      call_qsub(directories)
-      directories = []
-    else
-      directories << [index, dir]
-      next
+  if OPTIONS[:nested]
+    Find.find(OPTIONS[:directory]) do |path|
+      next if File.basename(path) != "metadata.yml"
+      dir = File.dirname(path)
+      index += 1
+      if index % 500 == 0
+        directories << [index, dir]
+        call_qsub(directories)
+        directories = []
+      else
+        directories << [index, dir]
+        next
+      end
     end
+    # Send the residual directories
+    call_qsub(directories)
+  else
+    Dir.glob(File.join(OPTIONS[:directory], "**", "metadata.yml")).each do |path|
+      next if File.basename(path) != "metadata.yml"
+      dir = File.dirname(path)
+      index += 1
+      directories << [index, dir]
+    end
+    call_qsub(directories)
   end
-
-  # Send the residual files
-  call_qsub(directories)
 
   puts "Done!".green
 
