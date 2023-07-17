@@ -4,16 +4,16 @@ The [DINA Consortium][1] develops an open-source web-based information managemen
 
 This basic script uploads image assets using the [dina ruby gem][9] via the AAFC biocluster from its mounted isilon.
 
-### Disclaimer
+## Disclaimer
 
 This script is under development and contains a number of hard-coded features. It is not meant to be a full-featured asset upload utility.
 
-### Requirements & Dependencies
+## Requirements & Dependencies
 
 - ruby >= 3.1
 - bundled dependencies: [dina][9], [json_api_client][5] (\~> 1.20), [keycloak][10] (\~> 3.2.1),
 
-### Install
+## Install
 
 ```bash
 $ git clone https://github.com/dshorthouse/dina-image-upload.git
@@ -21,7 +21,7 @@ $ conda env create -f conda/environment.yml
 $ conda activate dina
 $ gem install colorize dina sqlite3
 ```
-### Configuration
+## Configuration
 
 Create SQLite database:
 ```bash
@@ -92,16 +92,16 @@ sqlite> DELETE FROM logs;
 ctrl-d
 ```
 
-### Support
+## Support
 
 Bug reports can be filed at [https://github.com/dshorthouse/dina-image-upload/issues][3].
 
-### Copyright
+## Copyright
 Copyright © 2023 Government of Canada
 
 Authors: [David P. Shorthouse][4]
 
-### License
+## License
 
 `dina-image-upload` is released under the [MIT license][2].
 
