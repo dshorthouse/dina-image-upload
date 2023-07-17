@@ -8,7 +8,7 @@ fi
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate dina
 
-cd ~/cluster_scripts/dina-image-upload
+cd ~/dina-image-upload
 line=$SGE_TASK_ID
 output=`./upload_assets_worker.rb --paths_list_file $paths_list_file --line $line`
 

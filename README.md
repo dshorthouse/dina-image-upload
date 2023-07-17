@@ -66,6 +66,19 @@ Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
 
 `./load-jobs.rb -d /my-directory`
 
+The `load-jobs.rb` script:
+- flushes the contents of `/indexed_paths`
+- gathers all directories that contain a `metadata.yml` file on the isilon via the provided directory (`-d` paramater above)
+- adds a running integer column
+- writes these to one or more csv files in `/indexed_paths`
+- calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh` and a `--paths_list_file` parameter for a csv file in `/indexed_paths`
+- `qsub_batch.sh` is invoked by a node in the biocluster which,
+  - activates the dina conda environment
+  - changes to the `~/dina-image-upload` directory
+  - receives the value in the `--paths_list_file` parameter as well as a `--line` parameter (automatically passed by having called qsub)
+- `qsub_batch.sh` calls `upload_asserts_worker.rb` by a node in the biocluster, which receives a pointer to a csv file in `/indexed_paths` as well as a line number to find a directory containing a metadata.yml, a jpg derivative, and either a CR2 or NEF image to processed
+- `upload_assets_worker.rb` writes to SQLite and also produces a response that is echoed back to `qsub_batch.sh` that then writes to `upload_assets_output.csv`
+
 Output writes to SQLite into either an 'errors' or 'logs' table as well as to `upload_assets_output.csv`.
 
 ### SQLite Specifics
@@ -91,6 +104,10 @@ sqlite> DELETE FROM logs;
 # Exit out from sqlite
 ctrl-d
 ```
+
+## Anticipated Enhancements
+
+Using a convoluted writing to csv in order to then pass to qsub was written long before SQLite was eventually used to capture logs and errors. A far better method to load jobs would be to create a dedicated table in SQLite with two columns: the directory path containing a metadata.yml & a status and then populate these through initial directory traversals.
 
 ## Support
 
