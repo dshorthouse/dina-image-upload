@@ -16,11 +16,17 @@ This script is under development and contains a number of hard-coded features. I
 ### Install
 
 ```bash
+$ git clone https://github.com/dshorthouse/dina-image-upload.git
+$ conda env create -f conda/environment.yml
+$ conda activate dina
 $ gem install colorize dina sqlite3
 ```
 ### Configuration
 
 Create SQLite database:
+```bash
+$ irb
+```
 
 ```ruby
 require "sqlite3"
@@ -46,15 +52,25 @@ rows = db.execute <<-SQL
 SQL
 ```
 
-See configuration for the dina gem in upload_assets_worker.rb
+Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
 
-### Execution
+## Execution
 
-`./load-jobs.rb -d /my-root-directories`
+### Load jobs on the biocluster
+
+#### Nested directory traversal
+`./load-jobs.rb -d /my-parent-directory -n`
+
+#### Non-nested directory traversal
+(two-levels deep)
+
+`./load-jobs.rb -d /my-directory`
+
+Output writes to SQLite into either an 'errors' or 'logs' table as well as to `upload_assets_output.csv`.
 
 ### SQLite Specifics
 
-```
+```bash
 $ sqlite3 image-upload.db
 
 # Show tables
