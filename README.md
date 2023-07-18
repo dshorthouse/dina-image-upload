@@ -2,11 +2,11 @@
 
 The [DINA Consortium][1] develops an open-source web-based information management system for natural history data that consists of several connected software components. At the core of the system is support for assembling, managing and sharing data associated with natural history collections and their curation ("collection management"). Target collections include zoological, botanical, geological and paleontological collections, living collections, biodiversity inventories, observation records, and molecular data.
 
-This basic script uploads image assets using the [dina ruby gem][2] via the AAFC biocluster from its mounted isilon via a conda environment.
+This basic pipeline uploads image assets using the [dina ruby gem][2] via the AAFC biocluster from its mounted isilon via a conda environment and stores outputs in SQLite.
 
 ## Disclaimer
 
-This script is under development and contains a number of hard-coded features. It is not meant to be a full-featured asset upload utility.
+These scripts are under development and contain a number of hard-coded features. This project is not meant to be a full-featured asset upload utility.
 
 ## Install
 
@@ -23,7 +23,7 @@ $ cp config/dina.yml.sample config/dina.yml
 $ cp config/token.json.sample config/token.json
 ```
 1. Adjust content in `/config/dina.yml`
-2. Create SQLite database: `./create_database.rb`
+2. Create SQLite tables in a database: `./create_database.rb`
 
 ## Execution
 
