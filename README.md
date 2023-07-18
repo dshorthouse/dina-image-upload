@@ -74,7 +74,9 @@ Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
 
 `./load-jobs.rb --directory /isilon/ottawa-rdc-htds/data_20211221`
 
-#### Description of Workflow
+And that's it! You can see if job are loaded and starting to work by typing `$ qstat`. If there's a disaster, you can delete queued jobs via `$ qdel <JOBID>`.
+
+### Description of Workflow
 
 - `load-jobs.rb`:
   - truncates the `directories` table in the `image-upload.db` SQLite database
