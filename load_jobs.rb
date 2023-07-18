@@ -2,10 +2,10 @@
 # encoding: utf-8
 
 require "optparse"
-require "csv"
+require "config"
+require "sqlite3"
 require "find"
 require "colorize"
-require "sqlite3"
 require "./database/database"
 
 ARGV << '-h' if ARGV.empty?

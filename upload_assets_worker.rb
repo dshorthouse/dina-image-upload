@@ -2,12 +2,11 @@
 # encoding: utf-8
 
 require "optparse"
-require "csv"
+require "config"
+require "sqlite3"
 require "dina"
 require "time"
-require "sqlite3"
-require "config"
-require "database/database"
+require "./database/database"
 
 $stdout.sync = true
 
