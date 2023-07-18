@@ -37,12 +37,12 @@ class Database
     @db.execute "INSERT INTO #{table} (#{cols}) VALUES (#{places})", hash.values
   end
 
-  def select_directory_by_rowid(rowid:)
+  def select_directory(rowid:)
     @db.get_first_value "SELECT directory FROM directories WHERE rowid = ?", rowid
   end
 
   def delete_directory(rowid:)
-    @db.execute "DELETE FROM directory WHERE rowid = ?", rowid
+    @db.execute "DELETE FROM directories WHERE rowid = ?", rowid
   end
 
   def select_max_directory_rowid

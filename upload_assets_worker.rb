@@ -32,16 +32,6 @@ def load_config
   @db = Database.new(file: Settings.database)
 end
 
-def response
-  {
-    directory: nil,
-    object: nil,
-    derivative: nil,
-    image_original: nil,
-    image_derivative: nil
-  }
-end
-
 def calculated_hash(path:, hash_function:)
   if hash_function == "Double SHA-1"
     `openssl dgst -binary -sha1 "#{path}" | openssl sha1`.split(" ").last
@@ -63,6 +53,14 @@ if OPTIONS[:rowid]
     puts "directory missing: #{directory}"
     exit
   end
+
+  response = {
+    directory: nil,
+    object: nil,
+    derivative: nil,
+    image_original: nil,
+    image_derivative: nil
+  }
 
   begin
     # Read the sidecar file
@@ -109,7 +107,7 @@ if OPTIONS[:rowid]
     metadata.orientation = yml["orientation"]
     if original.dateTimeDigitized
       date_time = Time.find_zone("America/New_York")
-                      .parse(file.dateTimeDigitized)
+                      .parse(original.dateTimeDigitized)
                       .rfc3339
                       .to_s rescue nil
       metadata.acDigitizationDate = date_time

@@ -36,7 +36,7 @@ end
 def queue_jobs
   max = @db.select_max_directory_rowid
   if max
-    `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "1-#{max}" -tc 3 "#{Dir.pwd}"/qsub_batch.sh"`
+    `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "1-#{max}" -tc 3 "#{Dir.pwd}"/qsub_batch.sh`
   else
     puts "No directories to queue".red
   end
