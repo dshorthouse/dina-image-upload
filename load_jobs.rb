@@ -26,28 +26,30 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+def db_insert(table:, hash:)
+  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
+  cols = hash.keys.join(",")
+  places = ("?"*(hash.keys.size)).split("").join(",")
+  db.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
+end
+
 def call_qsub(directories)
-  file = File.join(Dir.pwd, 'indexed_paths', "#{DateTime.now.strftime('%Q')}.csv")
-  CSV.open(file, "w") do |csv|
-    directories.each do |directory|
-      csv << directory
-    end
+  directories.each do |directory|
+    db_insert(table: "directories", hash: { id: directory[0], directory: directory[1] })
   end
+
   min_max = directories.map{|a| a[0]}.minmax
-  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min_max[0]}-#{min_max[1]}" -tc 3 "#{Dir.pwd}"/qsub_batch.sh --paths_list_file "#{file}"`
+  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min_max[0]}-#{min_max[1]}" -tc 3 "#{Dir.pwd}"/qsub_batch.sh"`
   puts "Batch sent for #{min_max}"
 end
 
-def flush_indexed_paths
-  Dir.foreach(File.join(Dir.pwd, 'indexed_paths')) do |f|
-    fn = File.join(File.join(Dir.pwd, 'indexed_paths'), f)
-    File.delete(fn) if f != '.' && f != '..'
-  end
+def db_truncate_directories
+  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
+  db.execute "delete from directories"
 end
 
 if OPTIONS[:directory]
-  flush_indexed_paths
-
+  db_truncate_directories
   index = 0
   directories = []
   if OPTIONS[:nested]

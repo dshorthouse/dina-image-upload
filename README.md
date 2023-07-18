@@ -36,8 +36,14 @@ db = SQLite3::Database.new "image-upload.db"
 
 # Create tables
 rows = db.execute <<-SQL
+  create table directories (
+    id integer,
+    directory varchar(256)
+  );
+SQL
+rows = db.execute <<-SQL
   create table logs (
-    original_directory varchar(256),
+    directory varchar(256),
     object char(36),
     derivative char(36),
     image_original char(36),
@@ -46,10 +52,11 @@ rows = db.execute <<-SQL
 SQL
 rows = db.execute <<-SQL
   create table errors (
-    type varchar(256),
-    original_directory varchar(256)
+    directory varchar(256),
+    type varchar(256)
   );
 SQL
+db.execute("create unique index id_idx ON directories(id);")
 ```
 
 Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
@@ -67,28 +74,24 @@ Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
 `./load-jobs.rb -d /my-directory`
 
 The `load-jobs.rb` script:
-- flushes the contents of `/indexed_paths`
-- gathers all directories that contain a `metadata.yml` file on the isilon via the provided directory (`-d` paramater above)
-- adds a running integer column
-- writes these to one or more csv files in `/indexed_paths`
-- calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh` and a `--paths_list_file` parameter for a csv file in `/indexed_paths`
-- `qsub_batch.sh` is invoked by a node in the biocluster which,
+- truncates the `directories` table in the `image-upload.db` sqlite database
+- creates entries in the `directories` table that contain a `metadata.yml` file on the isilon via the provided directory (`-d` paramater above)
+- calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh`
+- `qsub_batch.sh` is invoked by a node in the biocluster that:
   - activates the dina conda environment
   - changes to the `~/dina-image-upload` directory
-  - receives the value in the `--paths_list_file` parameter as well as a `--line` parameter (automatically passed by having called qsub)
-- `qsub_batch.sh` calls `upload_asserts_worker.rb` by a node in the biocluster, which receives a pointer to a csv file in `/indexed_paths` as well as a line number to find a directory containing a metadata.yml, a jpg derivative, and either a CR2 or NEF image to processed
-- `upload_assets_worker.rb` writes to SQLite and also produces a response that is echoed back to `qsub_batch.sh` that then writes to `upload_assets_output.csv`
+  - receives the integer value from the `--identifier` parameter (automatically passed by having called qsub)
+- `qsub_batch.sh` calls `upload_asserts_worker.rb` by a node in the biocluster, which receives an integer to select a directory from the `directories` table that contains a metadata.yml, a jpg derivative, and either a CR2 or NEF image to be processed
+- `upload_assets_worker.rb` writes to `image-upload.db` and also `puts` a response to `qsub_batch.sh` that then writes to `upload_assets_output.csv`
 
-Output writes to SQLite into either an 'errors' or 'logs' table as well as to `upload_assets_output.csv`.
-
-### SQLite Specifics
+### SQLite Helper Queries
 
 ```bash
 $ sqlite3 image-upload.db
 
 # Show tables
 sqlite> .tables
-errors logs
+errors logs directories
 
 # Show schema
 sqlite> .schema
@@ -96,18 +99,16 @@ sqlite> .schema
 # Select all records from tables
 sqlite> SELECT * FROM errors;
 sqlite> SELECT * FROM logs;
+sqlite> SELECT * FROM directories;
 
 # Truncate tables
 sqlite> DELETE FROM errors;
 sqlite> DELETE FROM logs;
+sqlite> DELETE FROM directories;
 
 # Exit out from sqlite
 ctrl-d
 ```
-
-## Anticipated Enhancements
-
-Using a convoluted writing to csv in order to then pass to qsub was written long before SQLite was eventually used to capture logs and errors. A far better method to load jobs would be to create a dedicated table in SQLite with two columns: the directory path containing a metadata.yml & a status and then populate these through initial directory traversals.
 
 ## Support
 
