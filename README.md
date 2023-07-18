@@ -74,16 +74,25 @@ Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
 
 `./load-jobs.rb --directory /isilon/ottawa-rdc-htds/data_20211221`
 
-The `load-jobs.rb` script:
-- truncates the `directories` table in the `image-upload.db` SQLite database
-- creates entries in the `directories` table for the isilon that each contain a `metadata.yml` file via the provided directory (`--directory` parameter above)
-- calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh` for the nodes to execute
+#### Description of Workflow
+
+- `load-jobs.rb`:
+  - truncates the `directories` table in the `image-upload.db` SQLite database
+  - creates entries in the `directories` table for the isilon that each contain a `metadata.yml` file via the provided directory (`--directory` parameter above)
+  - calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh` for the nodes to execute
 - `qsub_batch.sh` is invoked by a node in the biocluster that:
   - activates the dina conda environment
   - changes to the `~/dina-image-upload` directory
   - receives the integer value from the `--identifier` parameter (automatically passed via `qsub`'s $SGE_TASK_ID above)
-- `qsub_batch.sh` calls `upload_assets_worker.rb` from a node in the biocluster, which receives the $SGE_TASK_ID integer to select a directory from the `directories` SQLite table
-- `upload_assets_worker.rb` processes the directory on the isilon and writes to the `image-upload.db` SQLite database and also `puts` a response to `qsub_batch.sh` that writes to `upload_assets_output.csv` for additional logging.
+  - calls `upload_assets_worker.rb` and passes `--identifier $SGE_TASK_ID`
+- `upload_assets_worker.rb`:
+  - selects a directory from the SQLite database
+  - reads the `metadata.yml` file
+  - creates an object store metadata entry
+  - uploads the files to the bucket
+  - verifies the MD5 hash post-upload for the CR2 or the NEF
+  - writes to either the `logs` or `errors` table in the `image-upload.db` SQLite database
+  - `puts` a response that `qsub_batch.sh` receives, which writes to `upload_assets_output.csv` for additional logging
 
 ### SQLite Helper Queries
 
