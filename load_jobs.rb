@@ -51,7 +51,7 @@ if OPTIONS[:directory]
   puts "Inserting into directories table..."
   Find.find(OPTIONS[:directory]) do |path|
     next if File.basename(path) != "metadata.yml"
-    @db.insert(table: "directories", { directory: File.dirname(path) })
+    @db.insert(table: "directories", hash: { directory: File.dirname(path) })
     puts File.dirname(path)
   end
 
