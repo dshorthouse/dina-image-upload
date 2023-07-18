@@ -66,23 +66,23 @@ Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
 ### Load jobs on the biocluster
 
 #### Nested directory traversal
-`./load-jobs.rb -d /my-parent-directory -n`
+`./load-jobs.rb --directory /my-parent-directory --nested`
 
 #### Non-nested directory traversal
 (two-levels deep)
 
-`./load-jobs.rb -d /my-directory`
+`./load-jobs.rb --directory /my-directory`
 
 The `load-jobs.rb` script:
-- truncates the `directories` table in the `image-upload.db` sqlite database
-- creates entries in the `directories` table that contain a `metadata.yml` file on the isilon via the provided directory (`-d` paramater above)
-- calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh`
+- truncates the `directories` table in the `image-upload.db` SQLite database
+- creates entries in the `directories` table that contain a `metadata.yml` file on the isilon via the provided directory (`--directory` parameter above)
+- calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh` for the nodes to execute
 - `qsub_batch.sh` is invoked by a node in the biocluster that:
   - activates the dina conda environment
   - changes to the `~/dina-image-upload` directory
-  - receives the integer value from the `--identifier` parameter (automatically passed by having called qsub)
-- `qsub_batch.sh` calls `upload_asserts_worker.rb` by a node in the biocluster, which receives an integer to select a directory from the `directories` table that contains a metadata.yml, a jpg derivative, and either a CR2 or NEF image to be processed
-- `upload_assets_worker.rb` writes to `image-upload.db` and also `puts` a response to `qsub_batch.sh` that then writes to `upload_assets_output.csv`
+  - receives the integer value from the `--identifier` parameter (automatically passed via `qsub` above)
+- `qsub_batch.sh` calls `upload_assets_worker.rb` from a node in the biocluster, which receives an integer to select a directory from the `directories` SQLite table that contains a metadata.yml file, a jpg derivative, and either a CR2 or NEF image to be processed
+- `upload_assets_worker.rb` writes to the `image-upload.db` SQLite database and also `puts` a response to `qsub_batch.sh` that then writes to `upload_assets_output.csv` for additional logging.
 
 ### SQLite Helper Queries
 
