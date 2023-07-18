@@ -50,12 +50,11 @@ end
 def db_insert(table:, hash:)
   cols = hash.keys.join(",")
   places = ("?"*(hash.keys.size)).split("").join(",")
-  DATABASE.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
+  DATABASE.execute "INSERT INTO #{table} (#{cols}) VALUES (#{places})", hash.values
 end
 
-# TODO: tidy this and test
 def db_select_path(id:)
-  DATABASE.get_first_value "select directory from directories WHERE id = ?", id
+  DATABASE.get_first_value "SELECT directory FROM directories WHERE id = ?", id
 end
 
 if OPTIONS[:id]

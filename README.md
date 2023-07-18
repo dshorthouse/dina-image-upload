@@ -36,13 +36,13 @@ db = SQLite3::Database.new "image-upload.db"
 
 # Create tables
 rows = db.execute <<-SQL
-  create table directories (
+  CREATE TABLE directories (
     id integer,
     directory varchar(256)
   );
 SQL
 rows = db.execute <<-SQL
-  create table logs (
+  CREATE TABLE logs (
     directory varchar(256),
     object char(36),
     derivative char(36),
@@ -51,12 +51,13 @@ rows = db.execute <<-SQL
   );
 SQL
 rows = db.execute <<-SQL
-  create table errors (
+  CREATE TABLE errors (
     directory varchar(256),
     type varchar(256)
   );
 SQL
-db.execute("create unique index id_idx ON directories(id);")
+# Add an index to the directories table
+db.execute("CREATE UNIQUE INDEX id_idx ON directories(id);")
 ```
 
 Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
@@ -66,23 +67,23 @@ Change the `Dina.config` hash variables in `upload_assets_worker.rb`.
 ### Load jobs on the biocluster
 
 #### Nested directory traversal
-`./load-jobs.rb --directory /my-parent-directory --nested`
+`./load-jobs.rb --directory /isilon/ottawa-rdc-htds/2019_06 --nested`
 
 #### Non-nested directory traversal
 (two-levels deep)
 
-`./load-jobs.rb --directory /my-directory`
+`./load-jobs.rb --directory /isilon/ottawa-rdc-htds/data_20211221`
 
 The `load-jobs.rb` script:
 - truncates the `directories` table in the `image-upload.db` SQLite database
-- creates entries in the `directories` table that contain a `metadata.yml` file on the isilon via the provided directory (`--directory` parameter above)
+- creates entries in the `directories` table for the isilon that each contain a `metadata.yml` file via the provided directory (`--directory` parameter above)
 - calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh` for the nodes to execute
 - `qsub_batch.sh` is invoked by a node in the biocluster that:
   - activates the dina conda environment
   - changes to the `~/dina-image-upload` directory
-  - receives the integer value from the `--identifier` parameter (automatically passed via `qsub` above)
-- `qsub_batch.sh` calls `upload_assets_worker.rb` from a node in the biocluster, which receives an integer to select a directory from the `directories` SQLite table that contains a metadata.yml file, a jpg derivative, and either a CR2 or NEF image to be processed
-- `upload_assets_worker.rb` writes to the `image-upload.db` SQLite database and also `puts` a response to `qsub_batch.sh` that then writes to `upload_assets_output.csv` for additional logging.
+  - receives the integer value from the `--identifier` parameter (automatically passed via `qsub`'s $SGE_TASK_ID above)
+- `qsub_batch.sh` calls `upload_assets_worker.rb` from a node in the biocluster, which receives the $SGE_TASK_ID integer to select a directory from the `directories` SQLite table
+- `upload_assets_worker.rb` processes the directory on the isilon and writes to the `image-upload.db` SQLite database and also `puts` a response to `qsub_batch.sh` that writes to `upload_assets_output.csv` for additional logging.
 
 ### SQLite Helper Queries
 
