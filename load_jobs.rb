@@ -6,7 +6,7 @@ require "csv"
 require "find"
 require "colorize"
 require "sqlite3"
-require "database/database"
+require "./database/database"
 
 ARGV << '-h' if ARGV.empty?
 

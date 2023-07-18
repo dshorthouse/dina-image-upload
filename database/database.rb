@@ -5,6 +5,10 @@ class Database
   end
 
   def create_schema
+    @db.execute "DROP TABLE directories"
+    @db.execute "DROP TABLE logs"
+    @db.execute "DROP TABLE errors"
+
     @db.execute <<-SQL
       CREATE TABLE directories (
         directory varchar(256)
