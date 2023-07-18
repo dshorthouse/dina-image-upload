@@ -1,0 +1,9 @@
+dina:
+  authorization_url: 'https://dina.biodiversity.agr.gc.ca/auth',
+  endpoint_url: 'https://dina.biodiversity.agr.gc.ca/api',
+  realm: 'dina',
+  client_id: 'dina-public',
+  user: '<<username>>',
+  password: '<<password>>',
+  token_store_file: 'config/token.json'
+database: 'database/image-upload.db'

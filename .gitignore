@@ -1,0 +1,5 @@
+.bundle
+.DS_Store
+.byebug_history
+config/dina.yml
+config/token.json

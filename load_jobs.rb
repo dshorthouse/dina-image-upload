@@ -5,10 +5,10 @@ require "optparse"
 require "csv"
 require "find"
 require "colorize"
+require "sqlite3"
+require "database/database"
 
 ARGV << '-h' if ARGV.empty?
-
-DATABASE = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
 
 OPTIONS = {}
 OptionParser.new do |opts|
@@ -18,8 +18,8 @@ OptionParser.new do |opts|
     OPTIONS[:directory] = directory
   end
 
-  opts.on("-n", "--nested", "Do nested traversal of supplied directory") do
-    OPTIONS[:nested] = true
+  opts.on("-s", "--database", "Use entries in the directories table in SQLite") do
+    OPTIONS[:database] = true
   end
 
   opts.on("-h", "--help", "Prints this help") do
@@ -28,58 +28,45 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-def db_insert(table:, hash:)
-  cols = hash.keys.join(",")
-  places = ("?"*(hash.keys.size)).split("").join(",")
-  DATABASE.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
+def load_config
+  Config.load_and_set_settings(File.join("config", "dina.yml"))
+  @db = Database.new(file: Settings.database)
 end
 
-def call_qsub(directories)
-  directories.each do |directory|
-    db_insert(table: "directories", hash: { id: directory[0], directory: directory[1] })
+def queue_jobs
+  max = @db.select_max_directory_rowid
+  if max
+    `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "1-#{max}" -tc 3 "#{Dir.pwd}"/qsub_batch.sh"`
+  else
+    puts "No directories to queue".red
   end
-
-  min_max = directories.map{|a| a[0]}.minmax
-  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min_max[0]}-#{min_max[1]}" -tc 3 "#{Dir.pwd}"/qsub_batch.sh"`
-  puts "Batch sent for #{min_max}"
-end
-
-def db_truncate_directories
-  DATABASE.execute "delete from directories"
 end
 
 if OPTIONS[:directory]
-  puts "truncating directories table in SQLite...".yellow
-  db_truncate_directories
+  load_config
 
-  puts "loading directories into SQLite..."
-  index = 0
-  directories = []
-  if OPTIONS[:nested]
-    Find.find(OPTIONS[:directory]) do |path|
-      next if File.basename(path) != "metadata.yml"
-      dir = File.dirname(path)
-      index += 1
-      if index % 500 == 0
-        directories << [index, dir]
-        call_qsub(directories)
-        directories = []
-      else
-        directories << [index, dir]
-        next
-      end
-    end
-    # Send the residual directories
-    call_qsub(directories)
-  else
-    Dir.glob(File.join(OPTIONS[:directory], "**", "metadata.yml")).each do |path|
-      next if File.basename(path) != "metadata.yml"
-      dir = File.dirname(path)
-      index += 1
-      directories << [index, dir]
-    end
-    call_qsub(directories)
+  puts "Truncating directories table...".yellow
+  @db.truncate_directories
+
+  puts "Inserting into directories table..."
+  Find.find(OPTIONS[:directory]) do |path|
+    next if File.basename(path) != "metadata.yml"
+    @db.insert(table: "directories", { directory: File.dirname(path) })
+    puts File.dirname(path)
   end
+
+  puts "Queuing jobs on the biocluster..."
+  queue_jobs
+
+  puts "Done!".green
+elsif OPTIONS[:database]
+  load_config
+
+  puts "Adjusting rowid in directories table...".yellow
+  @db.update_directories_rowid
+
+  puts "Queuing jobs on the biocluster..."
+  queue_jobs
 
   puts "Done!".green
 end
