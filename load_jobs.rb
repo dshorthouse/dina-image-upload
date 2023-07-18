@@ -8,6 +8,8 @@ require "colorize"
 
 ARGV << '-h' if ARGV.empty?
 
+DATABASE = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
+
 OPTIONS = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: load_jobs.rb [options]"
@@ -27,10 +29,9 @@ OptionParser.new do |opts|
 end.parse!
 
 def db_insert(table:, hash:)
-  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
   cols = hash.keys.join(",")
   places = ("?"*(hash.keys.size)).split("").join(",")
-  db.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
+  DATABASE.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
 end
 
 def call_qsub(directories)
@@ -44,12 +45,14 @@ def call_qsub(directories)
 end
 
 def db_truncate_directories
-  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
-  db.execute "delete from directories"
+  DATABASE.execute "delete from directories"
 end
 
 if OPTIONS[:directory]
+  puts "truncating directories table in SQLite...".yellow
   db_truncate_directories
+
+  puts "loading directories into SQLite..."
   index = 0
   directories = []
   if OPTIONS[:nested]
@@ -79,5 +82,4 @@ if OPTIONS[:directory]
   end
 
   puts "Done!".green
-
 end

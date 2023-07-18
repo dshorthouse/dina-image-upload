@@ -11,6 +11,8 @@ $stdout.sync = true
 
 ARGV << '-h' if ARGV.empty?
 
+DATABASE = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
+
 OPTIONS = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: upload_assets.rb [options]"
@@ -46,16 +48,14 @@ def calculated_hash(path:, hash_function:)
 end
 
 def db_insert(table:, hash:)
-  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
   cols = hash.keys.join(",")
   places = ("?"*(hash.keys.size)).split("").join(",")
-  db.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
+  DATABASE.execute "insert into #{table} (#{cols}) values (#{places})", hash.values
 end
 
 # TODO: tidy this and test
 def db_select_path(id:)
-  db = SQLite3::Database.new File.join(Dir.pwd, "image-upload.db")
-  db.get_first_value "select directory from directories WHERE id = ?", id
+  DATABASE.get_first_value "select directory from directories WHERE id = ?", id
 end
 
 if OPTIONS[:id]
