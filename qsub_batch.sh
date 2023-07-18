@@ -1,10 +1,5 @@
 #! /bin/bash
 
-if [[ $1 == *"--"* ]]; then
-    v="${1/--/}"
-    declare $v="$2"
-fi
-
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate dina
 
