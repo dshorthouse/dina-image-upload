@@ -76,7 +76,7 @@ And that's it! You can see if jobs are loaded and starting to work by typing `$ 
 - `load-jobs.rb`:
   - truncates the `directories` table in the `image-upload.db` SQLite database
   - creates entries in the `directories` table for the isilon that each contain a `metadata.yml` file via the provided directory (`--directory` parameter above)
-  - calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh` for the nodes to execute
+  - calls `qsub` with 3 workers (`-tc 3`) and a range of indexed directories (eg `-t 1-500`), passes `qsub_batch.sh` for the nodes to execute [**DANGER**: a nested directory traversal will make a worker for each batch of 500 jobs sent & might still overwhelm the DINA server]
 - `qsub_batch.sh` is invoked by a node in the biocluster that:
   - activates the dina conda environment
   - changes to the `~/dina-image-upload` directory
@@ -87,7 +87,7 @@ And that's it! You can see if jobs are loaded and starting to work by typing `$ 
   - reads the `metadata.yml` file
   - creates an object store metadata entry
   - uploads the files to the bucket
-  - verifies the MD5 hash post-upload for the CR2 or the NEF
+  - verifies the SHA1 post-upload for the CR2 or the NEF
   - writes to either the `logs` or `errors` table in the `image-upload.db` SQLite database
   - `puts` a response that `qsub_batch.sh` receives, which writes to `upload_assets_output.csv` for additional logging
 
