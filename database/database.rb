@@ -5,9 +5,10 @@ class Database
   end
 
   def create_schema
-    @db.execute "DROP TABLE directories"
-    @db.execute "DROP TABLE logs"
-    @db.execute "DROP TABLE errors"
+    @db.transaction
+    @db.execute "DROP TABLE IF EXISTS directories"
+    @db.execute "DROP TABLE IF EXISTS logs"
+    @db.execute "DROP TABLE IF EXISTS errors"
 
     @db.execute <<-SQL
       CREATE TABLE directories (
@@ -29,6 +30,7 @@ class Database
         type varchar(256)
       );
     SQL
+    @db.commit
   end
 
   def insert(table:, hash:)
@@ -42,7 +44,9 @@ class Database
   end
 
   def delete_directory(rowid:)
+    @db.transaction
     @db.execute "DELETE FROM directories WHERE rowid = ?", rowid
+    @db.commit
   end
 
   def select_max_directory_rowid
@@ -50,14 +54,18 @@ class Database
   end
 
   def update_directories_rowid
+    @db.transaction
     @db.execute "CREATE TABLE directories_tmp (directory varchar(256))"
     @db.execute "INSERT INTO directories_tmp SELECT directory FROM directories"
-    @db.execute "DROP TABLE directories"
+    @db.execute "DROP TABLE IF EXISTS directories"
     @db.execute "ALTER TABLE directories_tmp RENAME TO directories"
+    @db.commit
   end
 
   def truncate_directories
+    @db.transaction
     @db.execute "DELETE FROM directories"
+    @db.commit
   end
 
 end
