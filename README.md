@@ -27,6 +27,8 @@ $ cp config/token.json.sample config/token.json
 
 ## Execution
 
+`conda activate dina`
+
 Use a directory on the biocluster:
 
 `./load-jobs.rb --directory /isilon/ottawa-rdc-htds/data_20211221`
