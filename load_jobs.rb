@@ -22,6 +22,10 @@ OptionParser.new do |opts|
     OPTIONS[:database] = true
   end
 
+  opts.on("-w", "--workers [workers]", Integer, "Specify the number of concurrent workers") do |workers|
+    OPTIONS[:workers] = workers
+  end
+
   opts.on("-h", "--help", "Prints this help") do
     puts opts
     exit
@@ -34,9 +38,10 @@ def load_config
 end
 
 def queue_jobs
+  workers = OPTIONS[:workers] ||= 3
   max = @db.select_max_directory_rowid
   if max
-    `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "1-#{max}" -tc 3 "#{Dir.pwd}"/qsub_batch.sh`
+    `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "1-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub_batch.sh`
   else
     puts "No directories to queue".red
   end

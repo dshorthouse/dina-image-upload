@@ -37,6 +37,8 @@ Or, use entries in the directories table in the database:
 
 `./load-jobs.rb --database`
 
+In either case, you can specify the number of concurrent workers by additionally passing `--workers INT` where INT is an integer.
+
 And that's it!
 
 You can see if jobs are loaded and starting to work by typing `$ qstat`. If there's a disaster, you can delete queued jobs via `$ qdel <JOBID>`.
