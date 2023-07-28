@@ -46,11 +46,12 @@ class Database
   end
 
   def select_directory(rowid:)
+    directory = nil
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
-      value = db.get_first_value "SELECT directory FROM directories WHERE rowid = ?", rowid
+      directory = db.get_first_value("SELECT directory FROM directories WHERE rowid = ?", rowid).dup
     end
-    value
+    directory
   end
 
   def delete_directory(rowid:)
@@ -63,11 +64,12 @@ class Database
   end
 
   def select_max_directory_rowid
+    id = nil
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
-      value = db.get_first_value "SELECT MAX(rowid) FROM directories"
+      id = db.get_first_value("SELECT MAX(rowid) FROM directories").dup
     end
-    value
+    id
   end
 
   def update_directories_rowid
