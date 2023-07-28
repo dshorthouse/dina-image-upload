@@ -2,6 +2,9 @@ class Database
 
   def initialize(opts = {})
     @db = SQLite3::Database.new opts[:file]
+    # Normal synchronous mode
+    # https://sqlite.org/pragma.html#pragma_synchronous
+    @db.synchronous = 1
   end
 
   def create_schema
@@ -66,6 +69,10 @@ class Database
     @db.transaction do
       @db.execute "DELETE FROM directories"
     end
+  end
+
+  def close
+    @db.close if !@db.closed?
   end
 
 end

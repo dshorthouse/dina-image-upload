@@ -50,6 +50,7 @@ if OPTIONS[:rowid]
       type: 'directory missing'
     }
     @db.insert(table: "errors", hash: error)
+    @db.close
     puts "directory missing: #{directory}"
     exit
   end
@@ -88,6 +89,7 @@ if OPTIONS[:rowid]
         type: 'original file'
       }
       @db.insert(table: "errors", hash: error)
+      @db.close
       raise "original file did not upload: #{directory}"
     end
 
@@ -128,6 +130,7 @@ if OPTIONS[:rowid]
           type: 'hash mismatch',
         }
         @db.insert(table: "errors", hash: error)
+        @db.close
         raise "hashes do not match: #{directory}"
       end
     else
@@ -136,6 +139,7 @@ if OPTIONS[:rowid]
         type: 'metadata'
       }
       @db.insert(table: "errors", hash: error)
+      @db.close
       raise "metadata did not save: #{directory}"
     end
 
@@ -153,6 +157,7 @@ if OPTIONS[:rowid]
         type: 'derivative file'
       }
       @db.insert(table: "errors", hash: error)
+      @db.close
       raise "derivative file did not upload: #{directory}"
     end
 
@@ -174,6 +179,7 @@ if OPTIONS[:rowid]
         type: 'derivative metadata'
       }
       @db.insert(table: "errors", hash: error)
+      @db.close
       raise "derivative metadata did not save: #{directory}"
     end
 
@@ -187,6 +193,8 @@ if OPTIONS[:rowid]
 
     @db.insert(table: "logs", hash: response)
     @db.delete_directory(rowid: OPTIONS[:rowid])
+    @db.close
+
     puts response.to_s
   rescue Exception => e
     error = {
@@ -194,6 +202,7 @@ if OPTIONS[:rowid]
       type: "exception"
     }
     @db.insert(table: "errors", hash: error)
+    @db.close
     puts e.message + ": #{directory}"
     raise
   end

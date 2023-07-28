@@ -63,6 +63,8 @@ if OPTIONS[:directory]
   puts "Queuing jobs on the biocluster..."
   queue_jobs
 
+  @db.close
+
   puts "Done!".green
 elsif OPTIONS[:database]
   load_config
@@ -72,6 +74,8 @@ elsif OPTIONS[:database]
 
   puts "Queuing jobs on the biocluster..."
   queue_jobs
+
+  @db.close
 
   puts "Done!".green
 end
