@@ -7,6 +7,7 @@ class Database
   def create_schema
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
+      db.busy_timeout = 200
       db.transaction do
         db.execute "DROP TABLE IF EXISTS directories"
         db.execute "DROP TABLE IF EXISTS logs"
@@ -41,6 +42,7 @@ class Database
     places = ("?"*(hash.keys.size)).split("").join(",")
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
+      db.busy_timeout = 200
       db.execute "INSERT INTO #{table} (#{cols}) VALUES (#{places})", hash.values
     end
   end
@@ -49,6 +51,7 @@ class Database
     directory = nil
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
+      db.busy_timeout = 200
       directory = db.get_first_value("SELECT directory FROM directories WHERE rowid = ?", rowid).dup
     end
     directory
@@ -57,6 +60,7 @@ class Database
   def delete_directory(rowid:)
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
+      db.busy_timeout = 200
       db.transaction do
         db.execute "DELETE FROM directories WHERE rowid = ?", rowid
       end
@@ -67,6 +71,7 @@ class Database
     id = nil
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
+      db.busy_timeout = 200
       id = db.get_first_value("SELECT MAX(rowid) FROM directories").dup
     end
     id
@@ -75,6 +80,7 @@ class Database
   def update_directories_rowid
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
+      db.busy_timeout = 200
       db.transaction do
         db.execute "CREATE TABLE directories_tmp (directory varchar(256))"
         db.execute "INSERT INTO directories_tmp SELECT directory FROM directories"
@@ -87,6 +93,7 @@ class Database
   def truncate_directories
     SQLite3::Database.new(@db_path) do |db|
       db.synchronous = 1
+      db.busy_timeout = 200
       db.transaction do
         db.execute "DELETE FROM directories"
       end
