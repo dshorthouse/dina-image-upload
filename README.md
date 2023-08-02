@@ -30,7 +30,7 @@ $ cp config/token.json.sample config/token.json
 
 Use a directory on the biocluster:
 
-`./load-jobs.rb --directory /isilon/ottawa-rdc-htds/data_20211221`
+`./loader.rb --directory /isilon/ottawa-rdc-htds/data_20211221`
 
 You can specify the number of concurrent workers by additionally passing `--workers INT` where INT is an integer.
 
