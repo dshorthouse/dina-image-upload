@@ -33,7 +33,6 @@ dependencies:
   - openssl=3.1.1=hd590300_1
   - readline=8.2=h8228510_1
   - ruby=3.1.2=hc054e64_0
-  - sqlite=3.42.0=h2c6b66d_0
   - sysroot_linux-64=2.12=he073ed8_15
   - yaml=0.2.5=h7f98852_2
 prefix: /home/AAFC-AAC/shorthoused/miniconda3/envs/dina

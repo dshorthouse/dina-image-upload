@@ -6,4 +6,3 @@ dina:
   user: '<<username>>'
   password: '<<password>>'
   token_store_file: 'config/token.json'
-database: 'database/image-upload.db'

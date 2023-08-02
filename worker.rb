@@ -3,10 +3,8 @@
 
 require "optparse"
 require "config"
-require "sqlite3"
 require "dina"
 require "time"
-require "./database/database"
 
 $stdout.sync = true
 
@@ -14,10 +12,10 @@ ARGV << '-h' if ARGV.empty?
 
 OPTIONS = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: upload_assets.rb [options]"
+  opts.banner = "Usage: worker.rb [options]"
 
-  opts.on("-i", "--rowid [rowid]", Integer, "Identifier to query in directories table") do |rowid|
-    OPTIONS[:rowid] = rowid
+  opts.on("-d", "--directory [DIRECTORY]", String, "Path to a single directory containing a metadata.yml") do |directory|
+    OPTIONS[:directory] = directory
   end
 
   opts.on("-h", "--help", "Prints this help") do
@@ -29,7 +27,6 @@ end.parse!
 def load_config
   Config.load_and_set_settings(File.join("config", "dina.yml"))
   Dina.config = Settings.dina.to_h
-  @db = Database.new(file: Settings.database)
 end
 
 def calculated_hash(path:, hash_function:)
@@ -40,17 +37,13 @@ def calculated_hash(path:, hash_function:)
   end
 end
 
-if OPTIONS[:rowid]
+if OPTIONS[:directory]
   load_config
-  directory = @db.select_directory(rowid: OPTIONS[:rowid])
+
+  directory = OPTIONS[:directory]
 
   if !File.directory?(directory)
-    error = {
-      directory: directory,
-      type: 'directory missing'
-    }
-    @db.insert(table: "errors", hash: error)
-    puts "directory missing: #{directory}"
+    puts "ERROR directory missing: #{directory}"
     exit
   end
 
@@ -83,12 +76,7 @@ if OPTIONS[:rowid]
     if original.save
       response[:image_original] = original.id
     else
-      error = {
-        directory: directory,
-        type: 'original file'
-      }
-      @db.insert(table: "errors", hash: error)
-      raise "original file did not upload: #{directory}"
+      raise "ERROR original file did not upload: #{directory}"
     end
 
     # Create the metadata entry
@@ -123,20 +111,10 @@ if OPTIONS[:rowid]
       hash = calculated_hash(path: original.file_path, hash_function: metadata.acHashFunction)
       if metadata.acHashValue != hash
         metadata.destroy
-        error = {
-          directory: directory,
-          type: 'hash mismatch',
-        }
-        @db.insert(table: "errors", hash: error)
-        raise "hashes do not match: #{directory}"
+        raise "ERROR hashes do not match: #{directory}"
       end
     else
-      error = {
-        directory: directory,
-        type: 'metadata'
-      }
-      @db.insert(table: "errors", hash: error)
-      raise "metadata did not save: #{directory}"
+      raise "ERROR metadata did not save: #{directory}"
     end
 
     # Upload the derivative image
@@ -148,12 +126,7 @@ if OPTIONS[:rowid]
     if derivative.save
       response[:image_derivative] = derivative.id
     else
-      error = {
-        directory: directory,
-        type: 'derivative file'
-      }
-      @db.insert(table: "errors", hash: error)
-      raise "derivative file did not upload: #{directory}"
+      raise "ERROR derivative file did not upload: #{directory}"
     end
 
     # Create the derivative metadata
@@ -169,12 +142,7 @@ if OPTIONS[:rowid]
     if metadata_derivative.save
       response[:derivative] = metadata_derivative.id
     else
-      error = {
-        directory: directory,
-        type: 'derivative metadata'
-      }
-      @db.insert(table: "errors", hash: error)
-      raise "derivative metadata did not save: #{directory}"
+      raise "ERROR derivative metadata did not save: #{directory}"
     end
 
     # Write the UUIDs into the sidecar file
@@ -185,18 +153,9 @@ if OPTIONS[:rowid]
       File.open(sidecar, 'w') { |f| f.write(yml.to_yaml) }
     end
 
-    @db.insert(table: "logs", hash: response)
-    @db.delete_directory(rowid: OPTIONS[:rowid])
-
     puts response.to_s
   rescue Exception => e
-    error = {
-      directory: directory,
-      type: "exception"
-    }
-    @db.insert(table: "errors", hash: error)
-    puts e.message + ": #{directory}"
-    raise
+    puts e.message
   end
 
 end
