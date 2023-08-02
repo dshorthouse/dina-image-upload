@@ -5,6 +5,8 @@ require "optparse"
 require "config"
 require "find"
 require "colorize"
+require "time"
+require "csv"
 
 ARGV << '-h' if ARGV.empty?
 
@@ -57,20 +59,21 @@ def queue_jobs(file:)
   CSV.foreach(file) do |row|
     ids << row[0].to_i
   end
-  min_max = ids.map{|a| a[0]}.minmax
+  min = ids.minmax[0]
+  max = ids.minmax[1]
   log = clean_dirname(File.join(Dir.pwd, 'logs', "#{OPTIONS[:directory]}.csv"))
   error = clean_dirname(File.join(Dir.pwd, 'logs', "#{OPTIONS[:directory]}-errors.csv"))
-  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min_max[0]}-#{min_max[1]}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}"`
+  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}"`
 end
 
 if OPTIONS[:directory]
-  puts "Clearing tmp csv..."
+  puts "Clearing tmp csv...".yellow
   clear_tmp
 
-  puts "Inserting indexed directories into tmp csv..."
+  puts "Inserting indexed directories into tmp csv...".yellow
   csv = create_tmp
 
-  puts "Queuing jobs on the biocluster..."
+  puts "Queuing jobs on the biocluster...".yellow
   queue_jobs(file: csv)
 
   puts "Done!".green
