@@ -16,7 +16,7 @@ done
 while IFS=",", read -r id directory
 do
   if (( $id == $SGE_TASK_ID )); then
-    output=`./worker.rb --directory $directory`
+    output=`./worker.rb --directory "$directory"`
     if [[ "$output" == *"ERROR"* ]]; then
       echo "$output" | tee -a $error >/dev/null
     else

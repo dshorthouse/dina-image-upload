@@ -50,7 +50,7 @@ def create_tmp
 end
 
 def clean_dirname(dir)
-  dir.strip.tr("\u{202E}%$|:;/\t\r\n\\", "-").gsub(/(^-)|(-$)/,"")
+  dir.strip.tr("\u{202E}%$|:;/\s\t\r\n\\", "-").gsub(/(^-)|(-$)/,"")
 end
 
 def queue_jobs(file:)
@@ -61,8 +61,8 @@ def queue_jobs(file:)
   end
   min = ids.minmax[0]
   max = ids.minmax[1]
-  log = clean_dirname(File.join(Dir.pwd, 'logs', "#{OPTIONS[:directory]}.csv"))
-  error = clean_dirname(File.join(Dir.pwd, 'logs', "#{OPTIONS[:directory]}-errors.csv"))
+  log = File.join(Dir.pwd, 'logs', clean_dirname("#{OPTIONS[:directory]}.csv"))
+  error = File.join(Dir.pwd, 'logs', clean_dirname("#{OPTIONS[:directory]}-errors.csv"))
   `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}"`
 end
 
