@@ -48,7 +48,7 @@ You can see if jobs are loaded and starting to work by typing `$ qstat`. If ther
   - calls `qsub` and passes `qsub.sh` for the nodes to execute
 - `qsub.sh` is invoked by a node in the biocluster that:
   - activates the dina conda environment
-  - changes to the `~/dina-image-upload` directory
+  - changes to the `~/dina-image-upload` directory [**WARNING**: you will need to edit this if this project is not in your profile's root directory]
   - reads the $input csv file passed to it from `tmp/` and obtains a directory where index == $SGE_TASK_ID to call `worker.rb`
 - `worker.rb`:
   - receives a single directory
