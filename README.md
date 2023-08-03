@@ -41,8 +41,10 @@ You can see if jobs are loaded and starting to work by typing `$ qstat`. If ther
 ### Description of Workflow
 
 - `loader.rb`:
-  - `--directory [DIR]`: does a nested traversal of DIR and writes to a two-column csv file in `tmp/` for instances containing a metadata.yml file: index,directory
-  - `--workers [INT]`: specifies the number of concurrent workers  
+  - clears the contents of `tmp/`
+  - `--directory [DIR]`: does a nested traversal of DIR
+  - writes a two-column csv file in `tmp/` for instances containing a metadata.yml file: index,directory
+  - `--workers [INT]`: specifies the number of concurrent workers (3 is generally functional, more may result in pooled requests in the DINA application)
   - calls `qsub` and passes `qsub.sh` for the nodes to execute
 - `qsub.sh` is invoked by a node in the biocluster that:
   - activates the dina conda environment
@@ -55,6 +57,10 @@ You can see if jobs are loaded and starting to work by typing `$ qstat`. If ther
   - uploads the files to the bucket
   - verifies the SHA1 post-upload for the CR2 or the NEF
   - `puts` a response that `qsub.sh` receives, which writes to a log or error file in `logs/`
+
+## Log Files
+
+Given a --directory like `/isilon/ottawa-rdc-htds/2021_01/data_20210113` passed to `./loader.rb`, the log file(s) written in `logs/` will `isilon-ottawa-rdc-htds-2021_01-data_20210113.csv` and `isilon-ottawa-rdc-htds-2021_01-data_20210113-errors.csv` (if there are any).
 
 ## Support
 
