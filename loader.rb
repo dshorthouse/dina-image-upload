@@ -62,7 +62,7 @@ def queue_jobs(file:)
   min = ids.minmax[0]
   max = ids.minmax[1]
   log = File.join(Dir.pwd, 'logs', clean_dirname("#{OPTIONS[:directory]}.csv"))
-  error = File.join(Dir.pwd, 'logs', clean_dirname("#{OPTIONS[:directory]}-errors.csv"))
+  error = File.join(Dir.pwd, 'errors', clean_dirname("#{OPTIONS[:directory]}-errors.csv"))
   `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}"`
 end
 

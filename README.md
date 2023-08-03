@@ -56,11 +56,15 @@ You can see if jobs are loaded and starting to work by typing `$ qstat`. If ther
   - creates an object store metadata entry
   - uploads the files to the bucket
   - verifies the SHA1 post-upload for the CR2 or the NEF
-  - `puts` a response that `qsub.sh` receives, which writes to a log or error file in `logs/`
+  - `puts` a response that `qsub.sh` receives, which writes to a log file in `logs/` or an error file in `errors/`
 
 ## Log Files
 
-Given a --directory like `/isilon/ottawa-rdc-htds/2021_01/data_20210113` passed to `./loader.rb`, the log file(s) written in `logs/` will `isilon-ottawa-rdc-htds-2021_01-data_20210113.csv` and `isilon-ottawa-rdc-htds-2021_01-data_20210113-errors.csv` (if there are any).
+Given a --directory like `/isilon/ottawa-rdc-htds/2021_01/data_20210113` passed to `./loader.rb`, a success log is written to `logs/` named like `isilon-ottawa-rdc-htds-2021_01-data_20210113.csv` and an error log is written to `errors/` named like `isilon-ottawa-rdc-htds-2021_01-data_20210113-errors.csv` (if there are any). These will increase in number with every new --directory passed.
+
+## Sanity Check
+
+After a run, check the line count `wc -l` for the single csv file in `tmp/` and the corresponding log file in `logs/` and/or `errors/`.
 
 ## Support
 
