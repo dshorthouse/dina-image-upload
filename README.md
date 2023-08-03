@@ -60,7 +60,7 @@ You can see if jobs are loaded and starting to work by typing `$ qstat`. If ther
 
 ## Log Files
 
-Given a --directory like `/isilon/ottawa-rdc-htds/2021_01/data_20210113` passed to `./loader.rb`, a success log is written to `logs/` named like `isilon-ottawa-rdc-htds-2021_01-data_20210113.csv` and an error log is written to `errors/` named like `isilon-ottawa-rdc-htds-2021_01-data_20210113-errors.csv` (if there are any). These will increase in number with every new --directory passed.
+Given a --directory like `/isilon/ottawa-rdc-htds/2021_01/data_20210113` passed to `./loader.rb`, a success log is written to `logs/` named like `isilon-ottawa-rdc-htds-2021_01-data_20210113.txt` and an error log is written to `errors/` named like `isilon-ottawa-rdc-htds-2021_01-data_20210113-errors.txt` (if there are any). These will increase in number with every new --directory passed.
 
 ## Sanity Check
 
