@@ -22,7 +22,8 @@ $ gem install byebug colorize dina config
 $ cp config/dina.yml.sample config/dina.yml
 $ cp config/token.json.sample config/token.json
 ```
-1. Adjust content in `/config/dina.yml`
+
+Adjust content in `/config/dina.yml`. As is done by the `dina` gem, Keycloak access and refresh tokens are cached in `token.json`. Clear out this file if you change DINA environments through config in dina.yml (eg dev vs production).
 
 ## Execution
 
