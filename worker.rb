@@ -76,7 +76,7 @@ if OPTIONS[:directory]
     if original.save
       response[:image_original] = original.id
     else
-      raise "ERROR original file did not upload:"
+      raise "original file did not upload"
     end
 
     # Create the metadata entry
@@ -111,10 +111,10 @@ if OPTIONS[:directory]
       hash = calculated_hash(path: original.file_path, hash_function: metadata.acHashFunction)
       if metadata.acHashValue != hash
         metadata.destroy
-        raise "ERROR hashes do not match:"
+        raise "hashes do not match"
       end
     else
-      raise "ERROR metadata did not save:"
+      raise "metadata did not save"
     end
 
     # Upload the derivative image
@@ -126,7 +126,7 @@ if OPTIONS[:directory]
     if derivative.save
       response[:image_derivative] = derivative.id
     else
-      raise "ERROR derivative file did not upload:"
+      raise "derivative file did not upload"
     end
 
     # Create the derivative metadata
@@ -142,7 +142,7 @@ if OPTIONS[:directory]
     if metadata_derivative.save
       response[:derivative] = metadata_derivative.id
     else
-      raise "ERROR derivative metadata did not save:"
+      raise "derivative metadata did not save"
     end
 
     # Write the UUIDs into the sidecar file
@@ -155,7 +155,7 @@ if OPTIONS[:directory]
 
     puts response.to_s
   rescue Exception => e
-    puts e.message + " #{directory}"
+    puts ["ERROR", e.message, directory].join(": ")
   end
 
 end
