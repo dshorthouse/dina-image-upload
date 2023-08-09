@@ -33,6 +33,10 @@ Use a directory on the biocluster:
 
 `./loader.rb --directory /isilon/ottawa-rdc-htds/data_20211221`
 
+Or a comma-separated array of directories:
+
+`./loader.rb --directory /isilon/ottawa-rdc-htds/data_20211221,/isilon/ottawa-rdc-htds/data_20211222`
+
 You can specify the number of concurrent workers by additionally passing `--workers INT` where INT is an integer.
 
 And that's it!
