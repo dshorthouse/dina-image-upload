@@ -43,7 +43,7 @@ if OPTIONS[:directory]
   directory = OPTIONS[:directory]
 
   if !File.directory?(directory)
-    puts "ERROR directory missing: #{directory}"
+    puts "ERROR: directory missing: #{directory}"
     exit
   end
 
