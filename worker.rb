@@ -8,6 +8,18 @@ require "time"
 
 $stdout.sync = true
 
+# Monkey-patch RestClient to skip SSL checks for KeyCloak authentication
+module RestClient
+  class Request
+    orig_initialize = instance_method(:initialize)
+
+    define_method(:initialize) do |args|
+      args[:verify_ssl] = false
+      orig_initialize.bind(self).(args)
+    end
+  end
+end
+
 ARGV << '-h' if ARGV.empty?
 
 OPTIONS = {}
@@ -25,7 +37,9 @@ OptionParser.new do |opts|
 end.parse!
 
 def load_config
+  # Skip ssl verification for DINA API calls
   Dina::BaseModel.connection_options[:ssl] = { verify: false }
+
   Config.load_and_set_settings(File.join("config", "dina.yml"))
   Dina.config = Settings.dina.to_h
 end
