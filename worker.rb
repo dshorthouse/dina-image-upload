@@ -25,6 +25,7 @@ OptionParser.new do |opts|
 end.parse!
 
 def load_config
+  Dina::BaseModel.connection_options[:ssl] = { verify: false }
   Config.load_and_set_settings(File.join("config", "dina.yml"))
   Dina.config = Settings.dina.to_h
 end
