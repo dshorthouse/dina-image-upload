@@ -39,6 +39,8 @@ Or a comma-separated array of directories:
 
 You can specify the number of concurrent workers by additionally passing `--workers INT` where INT is an integer.
 
+You can specify a queue list by additionally passing `--queue STRING` where string is a named queue or queue list.
+
 And that's it!
 
 You can see if jobs are loaded and starting to work by typing `$ qstat`. If there's a disaster, you can delete queued jobs via `$ qdel <JOBID>`.
