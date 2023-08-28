@@ -18,6 +18,10 @@ OptionParser.new do |opts|
     OPTIONS[:directories] = directories
   end
 
+  opts.on("-q", "--queue [queue]", String, "Specify a comma-separated queue list") do |queue|
+    OPTIONS[:queue] = queue
+  end
+
   opts.on("-w", "--workers [workers]", Integer, "Specify the number of concurrent workers") do |workers|
     OPTIONS[:workers] = workers
   end
@@ -57,6 +61,7 @@ def clean_dirname(dir)
 end
 
 def queue_jobs(file:)
+  queue = OPTIONS[:queue] ||= "default"
   workers = OPTIONS[:workers] ||= 3
   ids = []
   CSV.foreach(file) do |row|
@@ -67,7 +72,7 @@ def queue_jobs(file:)
   filename = clean_dirname(OPTIONS[:directories].join("-"))
   log = File.join(Dir.pwd, 'logs', filename + ".txt")
   error = File.join(Dir.pwd, 'errors', filename + "-errors.txt")
-  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}"`
+  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -q "#{queue}" -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}"`
 end
 
 if OPTIONS[:directories]
