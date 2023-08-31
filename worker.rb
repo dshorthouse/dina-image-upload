@@ -30,6 +30,10 @@ OptionParser.new do |opts|
     OPTIONS[:directory] = directory
   end
 
+  opts.on("-v", "--validate", "Validate the SHA-1 hash of the image uploaded") do
+    OPTIONS[:validate] = true
+  end
+
   opts.on("-h", "--help", "Prints this help") do
     puts opts
     exit
@@ -123,10 +127,12 @@ if OPTIONS[:directory]
       response[:object] = metadata.id
 
       # Check the SHA1 hashes
-      hash = calculated_hash(path: original.file_path, hash_function: metadata.acHashFunction)
-      if metadata.acHashValue != hash
-        metadata.destroy
-        raise "hashes do not match"
+      if OPTIONS[:validate]
+        hash = calculated_hash(path: original.file_path, hash_function: metadata.acHashFunction)
+        if metadata.acHashValue != hash
+          metadata.destroy
+          raise "hashes do not match"
+        end
       end
     else
       raise "metadata did not save"

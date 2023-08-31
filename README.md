@@ -41,6 +41,8 @@ You can specify the number of concurrent workers by additionally passing `--work
 
 You can specify a queue list by additionally passing `--queue STRING` where string is a named queue or queue list.
 
+You can validate the SHA-1 hashes of the image post-upload by passing `--validate`.
+
 And that's it!
 
 You can see if jobs are loaded and starting to work by typing `$ qstat`. If there's a disaster, you can delete queued jobs via `$ qdel <JOBID>`.

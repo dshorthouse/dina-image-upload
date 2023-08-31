@@ -26,6 +26,10 @@ OptionParser.new do |opts|
     OPTIONS[:workers] = workers
   end
 
+  opts.on("-v", "--validate", "Validate the SHA-1 hash of the image uploaded") do
+    OPTIONS[:validate] = true
+  end
+
   opts.on("-h", "--help", "Prints this help") do
     puts opts
     exit
@@ -63,6 +67,7 @@ end
 def queue_jobs(file:)
   queue = OPTIONS[:queue] ||= "default"
   workers = OPTIONS[:workers] ||= 3
+  validate = OPTIONS[:validate] ? "--validate" : ""
   ids = []
   CSV.foreach(file) do |row|
     ids << row[0].to_i
@@ -72,7 +77,7 @@ def queue_jobs(file:)
   filename = clean_dirname(OPTIONS[:directories].join("-"))
   log = File.join(Dir.pwd, 'logs', filename + ".txt")
   error = File.join(Dir.pwd, 'errors', filename + "-errors.txt")
-  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -q "#{queue}" -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}"`
+  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -q "#{queue}" -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}" #{validate}`
 end
 
 if OPTIONS[:directories]
