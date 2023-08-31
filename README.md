@@ -54,6 +54,8 @@ You can see if jobs are loaded and starting to work by typing `$ qstat`. If ther
   - `--directory [DIR]`: does a nested traversal of DIR
   - writes a two-column csv file in `tmp/` for instances containing a metadata.yml file: index,directory
   - `--workers [INT]`: specifies the number of concurrent workers (3 is generally functional, more may result in pooled requests in the DINA application)
+  - `--queue [NAME]`: specifies a named queue (if provided by Biocluster admin)
+  - `--validate`: specifies if SHA-1 hashes of original image and that calculated by DINA post-upload match. If not, the metadata entry is deleted and an error is written to the log
   - calls `qsub` and passes `qsub.sh` for the nodes to execute
 - `qsub.sh` is invoked by a node in the biocluster that:
   - activates the dina conda environment
