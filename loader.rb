@@ -65,7 +65,7 @@ def clean_dirname(dir)
 end
 
 def queue_jobs(file:)
-  queue = OPTIONS[:queue] ||= "default"
+  queue = OPTIONS[:queue] ? "-q #{OPTIONS[:queue]}" : ""
   workers = OPTIONS[:workers] ||= 3
   validate = OPTIONS[:validate] ? "--validate" : ""
   ids = []
@@ -77,7 +77,7 @@ def queue_jobs(file:)
   filename = clean_dirname(OPTIONS[:directories].join("-"))
   log = File.join(Dir.pwd, 'logs', filename + ".txt")
   error = File.join(Dir.pwd, 'errors', filename + "-errors.txt")
-  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null -q "#{queue}" -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}" #{validate}`
+  `qsub -cwd -S /bin/bash -o /dev/null -e /dev/null "#{queue}" -pe orte 1 -t "#{min}-#{max}" -tc "#{workers}" "#{Dir.pwd}"/qsub.sh --input "#{file}" --log "#{log}" --error "#{error}" #{validate}`
 end
 
 if OPTIONS[:directories]
